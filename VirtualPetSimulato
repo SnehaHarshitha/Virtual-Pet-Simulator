@@ -1,0 +1,207 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+class Pet {
+    String name;
+    int hunger;
+    int happiness;
+    int health;
+    boolean isAlive;
+
+    // Constructor
+    public Pet(String name) {
+        this.name = name;
+        this.hunger = 50;
+        this.happiness = 50;
+        this.health = 100;
+        this.isAlive = true;
+    }
+
+    // Feed the pet
+    public void feed() {
+        if (isAlive) {
+            hunger -= 20;
+            happiness += 5;
+            JOptionPane.showMessageDialog(null, name + " has been fed!");
+        } else {
+            JOptionPane.showMessageDialog(null, name + " is no longer with us.");
+        }
+    }
+
+    // Play with the pet
+    public void play() {
+        if (isAlive) {
+            happiness += 20;
+            hunger += 10;
+            JOptionPane.showMessageDialog(null, "You played with " + name + "!");
+        } else {
+            JOptionPane.showMessageDialog(null, name + " is no longer with us.");
+        }
+    }
+
+    // Check the pet's status
+    public void checkStatus() {
+        if (isAlive) {
+            String status = name + "'s Status:\n" +
+                    "Hunger: " + hunger + "\n" +
+                    "Happiness: " + happiness + "\n" +
+                    "Health: " + health;
+            JOptionPane.showMessageDialog(null, status);
+        } else {
+            JOptionPane.showMessageDialog(null, name + " is no longer with us.");
+        }
+    }
+
+    // Heal the pet
+    public void heal() {
+        if (isAlive) {
+            health = 100;
+            JOptionPane.showMessageDialog(null, name + " has been healed!");
+        } else {
+            JOptionPane.showMessageDialog(null, name + " is no longer with us.");
+        }
+    }
+
+    // Age the pet, simulating the passage of time
+    public void age() {
+        if (isAlive) {
+            hunger += 10;
+            happiness -= 5;
+            if (hunger > 100 || happiness < 0) {
+                health -= 20;
+                if (health <= 0) {
+                    isAlive = false;
+                    JOptionPane.showMessageDialog(null, name + " has passed away.");
+                }
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, name + " is no longer with us.");
+        }
+    }
+}
+
+public class VirtualPetSimulator {
+	public static void main(String[] args) {
+	    SwingUtilities.invokeLater(() -> new VirtualPetSimulator().createAndShowGUI());
+	}
+
+    private JFrame frame;
+    private JButton feedButton, playButton, checkStatusButton, healButton, exitButton;
+    private JTextArea textArea;
+    private Pet pet;
+
+
+    // Create and show the GUI
+    private void createAndShowGUI() {
+        frame = new JFrame("Virtual Pet Simulator");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(400, 300);
+        frame.setLayout(new BorderLayout());
+
+        // Text area to display messages
+        textArea = new JTextArea();
+        textArea.setEditable(false);
+        frame.add(new JScrollPane(textArea), BorderLayout.CENTER);
+
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new GridLayout(5, 1));
+
+        // Create buttons
+        feedButton = new JButton("Feed the pet");
+        playButton = new JButton("Play with the pet");
+        checkStatusButton = new JButton("Check pet status");
+        healButton = new JButton("Heal the pet");
+        exitButton = new JButton("Exit");
+
+        // Add buttons to panel
+        buttonPanel.add(feedButton);
+        buttonPanel.add(playButton);
+        buttonPanel.add(checkStatusButton);
+        buttonPanel.add(healButton);
+        buttonPanel.add(exitButton);
+
+        frame.add(buttonPanel, BorderLayout.EAST);
+
+        // Start the game
+        String petName = JOptionPane.showInputDialog(frame, "What is your pet's name?");
+        if (petName != null && !petName.trim().isEmpty()) {
+            pet = new Pet(petName);
+            updateStatus();
+            addButtonListeners();
+        } else {
+            JOptionPane.showMessageDialog(frame, "You must provide a pet name!");
+            System.exit(0);
+        }
+
+        frame.setVisible(true);
+    }
+
+    // Add action listeners to buttons
+    private void addButtonListeners() {
+        feedButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                pet.feed();
+                updateStatus();
+            }
+        });
+
+        playButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                pet.play();
+                updateStatus();
+            }
+        });
+
+        checkStatusButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                pet.checkStatus();
+            }
+        });
+
+        healButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                pet.heal();
+                updateStatus();
+            }
+        });
+
+        exitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0);
+            }
+        });
+
+        // Simulate the passage of time every 1 second
+        Timer timer = new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                pet.age();
+                updateStatus();
+                if (!pet.isAlive) {
+                    ((Timer)e.getSource()).stop(); // Stop aging after the pet dies
+                }
+            }
+        });
+        timer.start();
+    }
+
+    // Update the pet's status in the text area
+    private void updateStatus() {
+        if (pet.isAlive) {
+            String status = pet.name + "'s Status:\n" +
+                    "Hunger: " + pet.hunger + "\n" +
+                    "Happiness: " + pet.happiness + "\n" +
+                    "Health: " + pet.health;
+            textArea.setText(status);
+        } else {
+            textArea.setText(pet.name + " is no longer with us.");
+        }
+    }
+}
